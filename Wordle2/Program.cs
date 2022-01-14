@@ -127,9 +127,9 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
         Console.Write($"({pass + startCutoff}/{startCutoff + bestGuess.Count}): {start.Word.Text} ({start.Avg:F3}) ({start.Worst}) => ");
         var (hist, maxword) = Play(
             new Robot(false, 
-                start.Word.Text, 
                 quiet: true, 
-                multithreaded:true
+                multithreaded:true,
+                startWords: start.Word.Text
                 ), quiet: true); // run robot against PC
         var endTime = Environment.TickCount;
         var elapsed = TimeSpan.FromMilliseconds(endTime - startTime);
@@ -150,12 +150,14 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
 //return;
 
 // thing to do
-Console.WriteLine("0: run robot, 1:Play, 2:Helper, 4: best first word, 6: search start words, see code for more");
-var task = Console.ReadLine() ?? "";
+Console.WriteLine("0: run robot (optional words on command line to start play), 1:Play, 2:Helper, 4: best first word, 6: search start words, see code for more");
+var line = Console.ReadLine() ?? "";
+var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+var task = words[0];
 switch (task)
 {
     case "0":
-        Play(new Robot(true, multithreaded:true)); // run robot against PC
+        Play(new Robot(true, multithreaded:true, startWords:words.Skip(1).ToArray())); // run robot against PC
         break;
     case "1":
         Play(); // play against PC

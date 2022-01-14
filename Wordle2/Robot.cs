@@ -9,14 +9,14 @@ class Robot : IPlayer
 
     int hiddenIndex;
 
-    string? startWord = null;
-    bool quiet = false;
-    bool multithreaded = false;
+    string [] startWords = null;
+    readonly bool quiet = false;
+    readonly bool multithreaded = false;
     
-    public Robot(bool verbose, string? startWord = null, bool quiet = false, bool multithreaded = false)
+    public Robot(bool verbose, bool quiet = false, bool multithreaded = false, params string [] startWords)
     {
         this.verbose = verbose;
-        this.startWord = startWord;
+        this.startWords = startWords;
         guess = String.Empty;
         this.quiet = quiet;
         this.multithreaded = multithreaded;
@@ -58,8 +58,8 @@ class Robot : IPlayer
         //var starts = new[] { "tapir", "close" };
         //var starts = new[] { "salon", "tripe" };
 
-        if (startWord != null)
-            starts = new[] {startWord };
+        if (startWords.Length > 0)
+            starts = startWords;
 
         if (pass < starts.Length) guess = starts[pass]; // todo - find best?
         else
