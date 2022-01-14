@@ -39,6 +39,7 @@ public class Knowledge
     // see how many unique knowledge items form
     static void TrackHash(Knowledge k)
     {
+        return; // disable for speed
         Interlocked.Increment(ref trackedCount);
         var hash = k.GenHash();
         seenHash.AddOrUpdate(hash, 0, (_, _) => 0);
