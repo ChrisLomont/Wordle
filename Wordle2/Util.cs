@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Numerics;
 
 namespace Wordle2;
 
@@ -78,7 +79,7 @@ static class Util
     // guess words: 0 = use those possible, 1 = use all possible hidden, 2 = use all words
     // sort on worst or on avg score when ordering words
     public static List<Ans> ScoreAll(
-        Knowledge k, 
+        Knowledge knowledge, 
         bool verbose = false, 
         int guessWordStyle = 0, 
         bool sortOnWorst = false,
@@ -88,7 +89,7 @@ static class Util
         if (verbose)
             Console.WriteLine("Scoring: ");
         
-        var left = k.Filter(Words.HiddenWords); // possible words left
+        var left = knowledge.Filter(Words.HiddenWords); // possible words left
         var guessable = left;
         if (guessWordStyle == 1)
             guessable = Words.HiddenWords;
@@ -140,7 +141,7 @@ static class Util
                 ()=>new ScoreHelper(), // initialize the local
                 (guess,_, scoreHelper) => // method
                 {
-                var ans1 = DoStep(guess, verbose, left, scoreHelper, k);
+                var ans1 = DoStep(guess, verbose, left, scoreHelper, knowledge);
                 scoreHelper.items.Add(ans1);
                 return scoreHelper; // used next pass
                 },
@@ -159,7 +160,7 @@ static class Util
 
             foreach (var guess in guessable)
             {
-                var ans1 = DoStep(guess, verbose, left, sc, k);
+                var ans1 = DoStep(guess, verbose, left, sc, knowledge);
                 items.Add(ans1);
             }
         }
@@ -283,86 +284,41 @@ static class Util
         return score - 1;
     }
 
-    public static uint Score(string answer, string guess)
+    public static uint Score(string solutionWord, string guessedWord)
     {
-#if false
-        var ans = ScoreOld(answer, guess);
-        uint s = 0;
-        for (var i = 0; i < 5; ++i)
-        {
-            var t = (uint)ans[i];
-            Debug.Assert(t<4);
-            s += t<<(2*i);
-        }
+        uint guessUsed = 0; // flags
+        uint answerUsed = 0;
+        
+        Debug.Assert((int)Info.Unused == 2); // next line assumes all set to Unused, else need to set
+        uint score = 0b0101010101U * (uint)Info.Unused; // all marked Unused, 2 bits each
 
-        return s;
-#else
-        var wordlen = guess.Length;
-        // var arr = new Info[wordlen];
-        uint score = 0;
-
-        // score perfect ones, mark rest as unused
-        for (var i = 0; i < wordlen; ++i)
+        for (var i = 0; i < guessedWord.Length; i++)
         {
-            Set(ref score, Info.Unused,i);// no match is default
-            //arr[i] = Info.Unused; 
-            if (guess[i] == answer[i])
+            if (guessedWord[i] == solutionWord[i])
             {
-                // perfect
-                Set(ref score, Info.Perfect, i);
-                // arr[i] = Info.Perfect; // perfect
+                guessUsed |= 1U << i;
+                answerUsed |= 1U << i;
+                Set(ref score, Info.Perfect, i); // todo - for speed, could make this a shifted xor mask
             }
         }
 
-#if true
-        //Dictionary<char, int> counts = new Dictionary<char, int>();
-        // for speed: count of letters in word, at most 3 of a given letter, so 0-3 in 2 bits
-        // 26 letters, 26*2 uses 52 bits, can store in 64 bit counter
-        ulong counter = 0UL, mask = 0b0011;
-        for (var i = 0; i < wordlen; ++i)
+        for (var gIndex = 0; gIndex < guessedWord.Length; gIndex++)
         {
-            if (guess[i] != answer[i])
+            if (((guessUsed >> gIndex) & 1) == 0)
             {
-                var c = answer[i];
-                counter += 1UL << ((c - 'a') * 2);
-                //if (!counts.ContainsKey(c))
-                //    counts.Add(c, 0);
-                //counts[c]++;
+                var guessLetter = guessedWord[gIndex];
+                for (var aIndex = 0; aIndex < solutionWord.Length; aIndex++)
+                {
+                    if (((answerUsed >> aIndex) & 1) == 0 && guessLetter == solutionWord[aIndex])
+                    {
+                        Set(ref score, Info.Misplaced, gIndex);
+                        answerUsed |= 1U << aIndex;
+                        break;
+                    }
+                }
             }
         }
-
-        for (var i = 0; i < wordlen; ++i)
-        {
-            //if (arr[i] == Info.Unused && counts.ContainsKey(guess[i]) && counts[guess[i]]>0)
-            //{
-            //    counts[guess[i]]--;
-            //    arr[i] = Info.Misplaced;
-            //}
-            var g2 = (guess[i] - 'a') * 2;
-            var m = mask << g2;
-            if (Get(score,i) == Info.Unused
-                /*arr[i] == Info.Unused */ && (counter & m) != 0)
-            {
-                counter -= 1UL << g2;
-                Set(ref score, Info.Misplaced,i);
-                //arr[i] = Info.Misplaced;
-            }
-        }
-#else
-        // score imperfect ones, only if they are not matched up to perfect
-        for (var i = 0; i < wordlen; ++i)
-        {
-            for (var j = 0; j < wordlen; ++j)
-            {
-                if (j != i && guess[i] == answer[j] && arr[i] == Info.Unused)
-                    arr[i] = Info.Misplaced; // misplaced
-            }
-        }
-#endif
-
         return score;
-
-#endif
     }
 
     static Info Get(uint score, int i)
@@ -375,66 +331,6 @@ static class Util
         i = 2 * i;
         score &= (uint)(~(0b11 << i));
         score |= ((uint)q) << i;
-    }
-
-    public static Info[] ScoreOld(string answer, string guess)
-    {
-        var wordlen = guess.Length;
-        var arr = new Info[wordlen];
-
-        // score perfect ones, mark rest as unused
-        for (var i = 0; i < wordlen; ++i)
-        {
-            arr[i] = Info.Unused; // no match is default
-            if (guess[i] == answer[i])
-                arr[i] = Info.Perfect; // perfect
-        }
-
-#if true
-        //Dictionary<char, int> counts = new Dictionary<char, int>();
-        // for speed: count of letters in word, at most 3 of a given letter, so 0-3 in 2 bits
-        // 26 letters, 26*2 uses 52 bits, can store in 64 bit counter
-        ulong counter = 0UL, mask = 0b0011;
-        for (var i = 0; i < wordlen; ++i)
-        {
-            if (guess[i] != answer[i])
-            {
-                var c = answer[i];
-                counter += 1UL << ((c - 'a') * 2);
-                //if (!counts.ContainsKey(c))
-                //    counts.Add(c, 0);
-                //counts[c]++;
-            }
-        }
-
-        for (var i = 0; i < wordlen; ++i)
-        {
-            //if (arr[i] == Info.Unused && counts.ContainsKey(guess[i]) && counts[guess[i]]>0)
-            //{
-            //    counts[guess[i]]--;
-            //    arr[i] = Info.Misplaced;
-            //}
-            var g2 = (guess[i] - 'a') * 2;
-            var m = mask << g2;
-            if (arr[i] == Info.Unused && (counter & m) != 0)
-            {
-                counter -= 1UL << g2;
-                arr[i] = Info.Misplaced;
-            }
-        }
-#else
-        // score imperfect ones, only if they are not matched up to perfect
-        for (var i = 0; i < wordlen; ++i)
-        {
-            for (var j = 0; j < wordlen; ++j)
-            {
-                if (j != i && guess[i] == answer[j] && arr[i] == Info.Unused)
-                    arr[i] = Info.Misplaced; // misplaced
-            }
-        }
-#endif
-
-        return arr;
     }
 
     public static void Write(string guess, uint result)

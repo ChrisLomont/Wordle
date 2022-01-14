@@ -75,7 +75,13 @@ class Robot : IPlayer
 
             if (guess == "")
             {
-                var left = Util.ScoreAll(k, guessWordStyle: 2, multiThreaded:multithreaded);
+                var left = Util.ScoreAll(
+                    knowledge:k, 
+                    guessWordStyle:2,
+                    multiThreaded:multithreaded,
+                    verbose:false,
+                    sortOnWorst:false
+                    );
                 guess = left[0].Word.Text;
                 if (hashRound)
                     cacheTwo.Add(result, guess);
