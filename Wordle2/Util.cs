@@ -12,11 +12,11 @@ static class Util
         // tally letters, output with counts
         var cnt = new (int, char)[26];
         foreach (var w in Words.HiddenWords)
-        foreach (var c in w.Text)
-        {
-            var i = c - 'a';
-            cnt[i] = (cnt[i].Item1 + 1, c);
-        }
+            foreach (var c in w.Text)
+            {
+                var i = c - 'a';
+                cnt[i] = (cnt[i].Item1 + 1, c);
+            }
         Array.Sort(cnt, (a, b) => -a.Item1.CompareTo(b.Item1));
         foreach (var (n, c) in cnt)
         {
@@ -36,10 +36,10 @@ static class Util
     {
         // find best start word
         var ans = ScoreAll(
-            new Knowledge(), 
-            verbose: false, 
+            new Knowledge(),
+            verbose: false,
             guessWordStyle: 2,
-            multiThreaded:true
+            multiThreaded: true
         );
         List<Ans> bestAvg = new();
         List<Ans> bestWorst = new();
@@ -136,10 +136,10 @@ static class Util
             object locker = new(); // for final aggregation
             // first is type of collection
             // second is type of thread local
-            Parallel.ForEach<Word,ScoreHelper>(
+            Parallel.ForEach<Word, ScoreHelper>(
                 guessable, // source collection
-                ()=>new ScoreHelper(), // initialize the local
-                (guess,_, scoreHelper) => // method
+                () => new ScoreHelper(), // initialize the local
+                (guess, _, scoreHelper) => // method
                 {
                 var ans1 = DoStep(guess, verbose, left, scoreHelper, knowledge);
                 scoreHelper.items.Add(ans1);
@@ -231,7 +231,7 @@ static class Util
         Words.RequireInit();
         var hiddenCount = Words.HiddenWords.Count;
         var allCount = Words.AllWords.Count;
-        ScoreCache = new uint[hiddenCount*allCount];
+        ScoreCache = new uint[hiddenCount * allCount];
 
         // sanity check
         HashSet<string> seen = new();
@@ -266,7 +266,7 @@ static class Util
     // nuances for multiple letters....
     // 5 slots, each 4 answers, = 20 bits
     // first index is lowest bits
-    
+
     public static uint Score(Word answer, Word guess)
     {
         var allCount = Words.AllWords.Count;
@@ -325,7 +325,7 @@ static class Util
     {
         return (Info)((score >> (2 * i)) & 3);
     }
-    
+
     static void Set(ref uint score, Info q, int i)
     {
         i = 2 * i;

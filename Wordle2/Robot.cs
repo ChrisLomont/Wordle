@@ -30,7 +30,7 @@ class Robot : IPlayer
             return "quit";
         }
         if (!quiet)
-            Console.Write($"Game {hiddenIndex+1}/{Words.HiddenWords.Count}: ");
+            Console.Write($"Game {hiddenIndex + 1}/{Words.HiddenWords.Count}: ");
         k = new();
         pass = 0;
         if (verbose)

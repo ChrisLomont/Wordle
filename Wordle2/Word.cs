@@ -15,8 +15,8 @@
             for (var i = 0; i < text.Length; ++i)
             {
 
-                var j = text[i]-'a';
-                CorrectIndices.Set(5*j+i, 1);
+                var j = text[i] - 'a';
+                CorrectIndices.Set(5 * j + i, 1);
                 UsedBitFlags |= 1U << j;
             }
 
@@ -26,9 +26,9 @@
         // bit i + 5*j set for letter 'a'+j in slot i
         public Bits CorrectIndices = new();
         // bit i set if letter 'a'+i used
-        public uint UsedBitFlags { get;  }
+        public uint UsedBitFlags { get; }
 
-        public string Text { get;  }
+        public string Text { get; }
 
 
     }
