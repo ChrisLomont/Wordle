@@ -12,7 +12,7 @@ class Robot : IPlayer
     string? startWord = null;
     bool quiet = false;
     bool multithreaded = false;
-    
+
     public Robot(bool verbose, string? startWord = null, bool quiet = false, bool multithreaded = false)
     {
         this.verbose = verbose;
@@ -30,7 +30,7 @@ class Robot : IPlayer
             return "quit";
         }
         if (!quiet)
-            Console.Write($"Game {hiddenIndex+1}/{Words.HiddenWords.Count}: ");
+            Console.Write($"Game {hiddenIndex + 1}/{Words.HiddenWords.Count}: ");
         k = new();
         pass = 0;
         if (verbose)
@@ -59,7 +59,7 @@ class Robot : IPlayer
         //var starts = new[] { "salon", "tripe" };
 
         if (startWord != null)
-            starts = new[] {startWord };
+            starts = new[] { startWord };
 
         if (pass < starts.Length) guess = starts[pass]; // todo - find best?
         else
@@ -75,7 +75,7 @@ class Robot : IPlayer
 
             if (guess == "")
             {
-                var left = Util.ScoreAll(k, guessWordStyle: 2, multiThreaded:multithreaded);
+                var left = Util.ScoreAll(k, guessWordStyle: 2, multiThreaded: multithreaded);
                 guess = left[0].Word.Text;
                 if (hashRound)
                     cacheTwo.Add(result, guess);

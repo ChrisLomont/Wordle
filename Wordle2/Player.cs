@@ -16,14 +16,14 @@ class Player : IPlayer
         Console.WriteLine();
     }
 
-    string guess="";
+    string guess = "";
 
     public string Get()
     {
 
         while (true)
         {
-            guess = Console.ReadLine()??String.Empty;
+            guess = Console.ReadLine() ?? String.Empty;
             if (Words.HiddenWords.FirstOrDefault(w => w.Text == guess) != null)
                 return guess;
             Console.Write(new string('\b', 5));

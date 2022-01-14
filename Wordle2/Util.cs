@@ -11,11 +11,11 @@ static class Util
         // tally letters, output with counts
         var cnt = new (int, char)[26];
         foreach (var w in Words.HiddenWords)
-        foreach (var c in w.Text)
-        {
-            var i = c - 'a';
-            cnt[i] = (cnt[i].Item1 + 1, c);
-        }
+            foreach (var c in w.Text)
+            {
+                var i = c - 'a';
+                cnt[i] = (cnt[i].Item1 + 1, c);
+            }
         Array.Sort(cnt, (a, b) => -a.Item1.CompareTo(b.Item1));
         foreach (var (n, c) in cnt)
         {
@@ -35,10 +35,10 @@ static class Util
     {
         // find best start word
         var ans = ScoreAll(
-            new Knowledge(), 
-            verbose: false, 
+            new Knowledge(),
+            verbose: false,
             guessWordStyle: 2,
-            multiThreaded:true
+            multiThreaded: true
         );
         List<Ans> bestAvg = new();
         List<Ans> bestWorst = new();
@@ -78,16 +78,16 @@ static class Util
     // guess words: 0 = use those possible, 1 = use all possible hidden, 2 = use all words
     // sort on worst or on avg score when ordering words
     public static List<Ans> ScoreAll(
-        Knowledge k, 
-        bool verbose = false, 
-        int guessWordStyle = 0, 
+        Knowledge k,
+        bool verbose = false,
+        int guessWordStyle = 0,
         bool sortOnWorst = false,
         bool multiThreaded = false
         )
     {
         if (verbose)
             Console.WriteLine("Scoring: ");
-        
+
         var left = k.Filter(Words.HiddenWords); // possible words left
         var guessable = left;
         if (guessWordStyle == 1)
@@ -135,14 +135,14 @@ static class Util
             object locker = new(); // for final aggregation
             // first is type of collection
             // second is type of thread local
-            Parallel.ForEach<Word,ScoreHelper>(
+            Parallel.ForEach<Word, ScoreHelper>(
                 guessable, // source collection
-                ()=>new ScoreHelper(), // initialize the local
-                (guess,_, scoreHelper) => // method
+                () => new ScoreHelper(), // initialize the local
+                (guess, _, scoreHelper) => // method
                 {
-                var ans1 = DoStep(guess, verbose, left, scoreHelper, k);
-                scoreHelper.items.Add(ans1);
-                return scoreHelper; // used next pass
+                    var ans1 = DoStep(guess, verbose, left, scoreHelper, k);
+                    scoreHelper.items.Add(ans1);
+                    return scoreHelper; // used next pass
                 },
                 (scoreHelper) =>
                 {
@@ -230,7 +230,7 @@ static class Util
         Words.RequireInit();
         var hiddenCount = Words.HiddenWords.Count;
         var allCount = Words.AllWords.Count;
-        ScoreCache = new uint[hiddenCount*allCount];
+        ScoreCache = new uint[hiddenCount * allCount];
 
         // sanity check
         HashSet<string> seen = new();
@@ -265,7 +265,7 @@ static class Util
     // nuances for multiple letters....
     // 5 slots, each 4 answers, = 20 bits
     // first index is lowest bits
-    
+
     public static uint Score(Word answer, Word guess)
     {
         var allCount = Words.AllWords.Count;
@@ -304,7 +304,7 @@ static class Util
         // score perfect ones, mark rest as unused
         for (var i = 0; i < wordlen; ++i)
         {
-            Set(ref score, Info.Unused,i);// no match is default
+            Set(ref score, Info.Unused, i);// no match is default
             //arr[i] = Info.Unused; 
             if (guess[i] == answer[i])
             {
@@ -340,11 +340,11 @@ static class Util
             //}
             var g2 = (guess[i] - 'a') * 2;
             var m = mask << g2;
-            if (Get(score,i) == Info.Unused
+            if (Get(score, i) == Info.Unused
                 /*arr[i] == Info.Unused */ && (counter & m) != 0)
             {
                 counter -= 1UL << g2;
-                Set(ref score, Info.Misplaced,i);
+                Set(ref score, Info.Misplaced, i);
                 //arr[i] = Info.Misplaced;
             }
         }
@@ -369,7 +369,7 @@ static class Util
     {
         return (Info)((score >> (2 * i)) & 3);
     }
-    
+
     static void Set(ref uint score, Info q, int i)
     {
         i = 2 * i;

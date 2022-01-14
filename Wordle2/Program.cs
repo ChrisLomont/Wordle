@@ -64,11 +64,11 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
     // merge the top N of each
     var bestGuess = new List<Ans>();
     var nextIndex = 0; // take both these
-    
+
     HashSet<string> used = new(); // track seen words to avoid double inserts
 
     // get at least N = endCutoff to test
-    while (bestGuess.Count < endCutoff) 
+    while (bestGuess.Count < endCutoff)
     {
         var a1 = bestAvg[nextIndex];
         var a2 = bestWorst[nextIndex];
@@ -95,7 +95,7 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
         Console.WriteLine($"{b.Word.Text}");
     }
 
-    Console.WriteLine($"Searching {bestGuess.Count+startCutoff} first words, starting at {startCutoff+1}, used {nextIndex} from both best avg and lowest worst");
+    Console.WriteLine($"Searching {bestGuess.Count + startCutoff} first words, starting at {startCutoff + 1}, used {nextIndex} from both best avg and lowest worst");
 
     ConcurrentDictionary<string, long[]> results = new();
 
@@ -125,7 +125,7 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
         ++pass;
         var startTime = Environment.TickCount;
         Console.Write($"({pass + startCutoff}/{startCutoff + bestGuess.Count}): {start.Word.Text} ({start.Avg:F3}) ({start.Worst}) => ");
-        var (hist, maxword) = Play(new Robot(false, start.Word.Text, quiet: true, multithreaded:false), quiet: true); // run robot against PC
+        var (hist, maxword) = Play(new Robot(false, start.Word.Text, quiet: true, multithreaded: false), quiet: true); // run robot against PC
         var endTime = Environment.TickCount;
         var elapsed = TimeSpan.FromMilliseconds(endTime - startTime);
         Console.Write($"{elapsed} ");
@@ -150,7 +150,7 @@ var task = Console.ReadLine() ?? "";
 switch (task)
 {
     case "0":
-        Play(new Robot(true, multithreaded:true)); // run robot against PC
+        Play(new Robot(true, multithreaded: true)); // run robot against PC
         break;
     case "1":
         Play(); // play against PC
@@ -187,48 +187,48 @@ void Analyze()
     var hiddenWords = Words.HiddenWords;
     var allLen = hiddenWords.Count;
     object locker = new object();
-    long total = (allLen * (allLen+1)) / 2;
+    long total = (allLen * (allLen + 1)) / 2;
     long finished = 0;
-    Parallel.For(0,allLen, i =>
-        {
+    Parallel.For(0, allLen, i =>
+         {
             //for (var i = 0; i < allLen; ++i)
             for (var j = i + 1; j < allLen; ++j)
-            {
-                var w1 = hiddenWords[i];
-                var w2 = hiddenWords[j];
-                var (best, avg, worst) = Stats(w1, w2);
-                lock (locker)
-                {
-                    if (best < bestBest)
-                    {
-                        bestBest = best;
-                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                    }
+             {
+                 var w1 = hiddenWords[i];
+                 var w2 = hiddenWords[j];
+                 var (best, avg, worst) = Stats(w1, w2);
+                 lock (locker)
+                 {
+                     if (best < bestBest)
+                     {
+                         bestBest = best;
+                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                     }
 
-                    if (avg < bestAvg)
-                    {
-                        bestAvg = avg;
-                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                    }
+                     if (avg < bestAvg)
+                     {
+                         bestAvg = avg;
+                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                     }
 
-                    if (worst < bestWorst)
-                    {
-                        bestWorst = worst;
-                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                    }
+                     if (worst < bestWorst)
+                     {
+                         bestWorst = worst;
+                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                     }
 
-                    ++finished;
-                    if ((finished % 500) == 0)
-                    {
-                        var pct = finished * 100.0 / total;
-                        Console.Write($"{pct:F2}% ");
-                    }
-                }
-            }
-        }
+                     ++finished;
+                     if ((finished % 500) == 0)
+                     {
+                         var pct = finished * 100.0 / total;
+                         Console.Write($"{pct:F2}% ");
+                     }
+                 }
+             }
+         }
     );
 
-    (int best,float avg,int worst) Stats(Word w1, Word w2)
+    (int best, float avg, int worst) Stats(Word w1, Word w2)
     {
         List<int> counts = new();
         foreach (var w in Words.HiddenWords)
@@ -264,7 +264,7 @@ void GameHelper()
         if (line.Length != 11)
             continue;
         uint score = 0;
-        var text = line.Substring(0,5).ToLower();
+        var text = line.Substring(0, 5).ToLower();
         var resultTxt = line.Substring(6, 5).ToUpper();
         for (var i = 0; i < resultTxt.Length; ++i)
         {
@@ -275,11 +275,11 @@ void GameHelper()
                 'G' => Info.Perfect,
                 _ => throw new NotImplementedException()
             };
-            score += ((uint)(t)<<(2*i));
+            score += ((uint)(t) << (2 * i));
         }
         k.Add(text, score);
         var left = k.Filter(Words.HiddenWords);
-        var ans = ScoreAll(k, verbose: false, guessWordStyle:2);
+        var ans = ScoreAll(k, verbose: false, guessWordStyle: 2);
 
         Console.Write($"\n{left.Count} ");
         for (var i = 0; i < left.Count; ++i)
@@ -305,7 +305,7 @@ void GameHelper()
 {
     player ??= new Player();
 
-    var histogram = new long [20];
+    var histogram = new long[20];
 
     var r = new Random(1234);
     //int min = 1000, max = -1;

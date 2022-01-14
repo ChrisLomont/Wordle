@@ -27,7 +27,7 @@ public class Knowledge
 
     //THREAD - safe
     static readonly ConcurrentDictionary<ulong, byte> seenHash = new();
-    
+
     static long trackedCount = 0;
 
     public static void DumpHashInfo()
@@ -80,7 +80,7 @@ public class Knowledge
     {
         for (var i = 0; i < text.Length; ++i)
         {
-            var t = (Info)((score >> (2 * i))&3);
+            var t = (Info)((score >> (2 * i)) & 3);
             if (t == Info.Perfect)
                 SetCorrect(text[i], i);
             else if (t == Info.Misplaced)
@@ -95,11 +95,11 @@ public class Knowledge
     public override string ToString()
     {
         var unu = "";
-        for (var i =0; i < 26; ++i)
-            if ((unusedBitFlags&(1U<<i))!=0) 
+        for (var i = 0; i < 26; ++i)
+            if ((unusedBitFlags & (1U << i)) != 0)
                 unu += (char)('a' + i);
-            
-        var c = new [] { '_', '_', '_', '_', '_'};
+
+        var c = new[] { '_', '_', '_', '_', '_' };
         for (var i = 0; i < 26; ++i)
         {
             for (var j = 0; j < 5; ++j)
@@ -132,7 +132,7 @@ public class Knowledge
             {
                 var k = new Knowledge();
                 k.Copy(this);
-                k.Add(w.Text, Util.Score(answer,w));
+                k.Add(w.Text, Util.Score(answer, w));
                 return !Same(k); // want them to differ, added knowledge
             }
             ).ToList();
@@ -144,8 +144,8 @@ public class Knowledge
         // check fields:
         return
             k.correctIndices.Same(correctIndices) &&
-            k.misplacedIndices.Same(misplacedIndices) && 
-            k.misplacedUsedBitFlags == misplacedUsedBitFlags && 
+            k.misplacedIndices.Same(misplacedIndices) &&
+            k.misplacedUsedBitFlags == misplacedUsedBitFlags &&
             k.unusedBitFlags == unusedBitFlags;
     }
 
@@ -175,7 +175,7 @@ public class Knowledge
             var i = index + 5 * (Char.ToLower(letter) - 'a');
             if (correctIndices.Get(i) != 0) return;
         }
-        if ((misplacedUsedBitFlags & (1U<<(letter-'a'))) != 0)
+        if ((misplacedUsedBitFlags & (1U << (letter - 'a'))) != 0)
             return;
         unusedBitFlags |= 1U << (Char.ToLower(letter) - 'a');
     }
@@ -205,7 +205,7 @@ public class Knowledge
         misplacedUsedBitFlags |= 1U << j;
 
         // letter j cannot be in slot index
-        misplacedIndices.Set(j*5+index,1); // set one
+        misplacedIndices.Set(j * 5 + index, 1); // set one
     }
 }
 
