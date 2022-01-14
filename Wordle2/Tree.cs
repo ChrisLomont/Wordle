@@ -15,10 +15,10 @@ namespace Wordle2
         {
             public override string ToString()
             {
-                return $"{children.Count}, {possibleHiddenWords.Count}";
+                return $"{children.Count}, {possibleHiddenWords?.Count}";
             }
 
-            // THREAD - must be done on single thread or dealth with differently
+            // THREAD - must be done on single thread or dealt with differently
             public static int nodeCount = 0;
 
             public Node()
@@ -41,7 +41,7 @@ namespace Wordle2
 
         public void Build(IEnumerable<Word> possibleHiddenWords, params Word[] guessedOrder)
         {
-            root = new Node{k = new(), possibleHiddenWords = new()};
+            root = new Node { k = new(), possibleHiddenWords = new() };
             root.possibleHiddenWords.AddRange(possibleHiddenWords);
             var unprocessed = new Queue<Node>();
             unprocessed.Enqueue(root);
@@ -65,44 +65,44 @@ namespace Wordle2
                     guesses = new() { guessedOrder[node.depth] };
 
                 foreach (var hiddenWord in node.possibleHiddenWords)
-                foreach (var guess in guesses)
-                {
-                    var k = new Knowledge();
-                    k.Copy(node.k);
-                    k.Add(guess.Text, Util.Score(hiddenWord, guess));
-                    var newPossible = k.Filter(node.possibleHiddenWords);
-                    if (newPossible.Count < node.possibleHiddenWords.Count)
+                    foreach (var guess in guesses)
                     {
-                        // see if any other kids have same knowledge, if so, this word points there too?
-                        var same = false;
-                        foreach (var c in node.children)
-                            if (c.k.Same(k))
-                            {
-                                same = true;
-                                ++sameKnowledge;
-                                break;
-                            }
-
-                        //same = false;
-                        if (!same)
+                        var k = new Knowledge();
+                        k.Copy(node.k);
+                        k.Add(guess.Text, Util.Score(hiddenWord, guess));
+                        var newPossible = k.Filter(node.possibleHiddenWords);
+                        if (newPossible.Count < node.possibleHiddenWords.Count)
                         {
+                            // see if any other kids have same knowledge, if so, this word points there too?
+                            var same = false;
+                            foreach (var c in node.children)
+                                if (c.k.Same(k))
+                                {
+                                    same = true;
+                                    ++sameKnowledge;
+                                    break;
+                                }
 
-                            // made progress
-
-                            var child = new Node
+                            //same = false;
+                            if (!same)
                             {
-                                k = k,
-                                possibleHiddenWords = newPossible,
-                                depth = node.depth + 1,
-                                parent = node
-                            };
 
-                            node.children.Add(child);
-                            unprocessed.Enqueue(child);
+                                // made progress
+
+                                var child = new Node
+                                {
+                                    k = k,
+                                    possibleHiddenWords = newPossible,
+                                    depth = node.depth + 1,
+                                    parent = node
+                                };
+
+                                node.children.Add(child);
+                                unprocessed.Enqueue(child);
+                            }
                         }
-                    }
 
-                }
+                    }
             }
         }
     }

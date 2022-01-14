@@ -24,11 +24,11 @@ namespace Wordle2
                 var txt = Games[index++];
                 var guess = txt.Substring(0, 5);
                 var ans = txt.Substring(5, 5);
-                var sc = Util.Score(answer,guess);
+                var sc = Util.Score(answer, guess);
                 var ans2 = "";
                 for (var i = 0; i < 5; ++i)
                 {
-                    var t = (Info)(((sc>>(i*2))&3));
+                    var t = (Info)(((sc >> (i * 2)) & 3));
                     ans2 += t switch
                     {
                         Info.Unused => '.',
@@ -38,7 +38,7 @@ namespace Wordle2
                     };
 
                 }
-                Trace.Assert(ans==ans2);
+                Trace.Assert(ans == ans2);
             }
 
             return index;
@@ -51,7 +51,7 @@ namespace Wordle2
         {
 
             // ReSharper disable All StringLiteralTypo
-            "crank","fruit.G...","track.GGYG","crackGGG.G", 
+            "crank","fruit.G...","track.GGYG","crackGGG.G",
             "rebus", "arise.Y.YY", "routeG.Y.Y", "rulesGY.YG",
             "craze","track.GGY.","crampGGG..","crazyGGG.",
             "today","stood.YY.Y","dotesYGY..","toadsGGYY.",

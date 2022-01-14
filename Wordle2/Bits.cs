@@ -21,7 +21,7 @@ public class Bits
             v = v * 9812768716291701UL + b; // todo - bad hash maybe
         }
 
-        return v; 
+        return v;
     }
 
 
