@@ -125,7 +125,12 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
         ++pass;
         var startTime = Environment.TickCount;
         Console.Write($"({pass + startCutoff}/{startCutoff + bestGuess.Count}): {start.Word.Text} ({start.Avg:F3}) ({start.Worst}) => ");
-        var (hist, maxword) = Play(new Robot(false, start.Word.Text, quiet: true, multithreaded:false), quiet: true); // run robot against PC
+        var (hist, maxword) = Play(
+            new Robot(false, 
+                start.Word.Text, 
+                quiet: true, 
+                multithreaded:true
+                ), quiet: true); // run robot against PC
         var endTime = Environment.TickCount;
         var elapsed = TimeSpan.FromMilliseconds(endTime - startTime);
         Console.Write($"{elapsed} ");
