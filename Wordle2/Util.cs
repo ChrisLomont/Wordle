@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Net.Mail;
-using System.Numerics;
+﻿using System.Diagnostics;
 
 namespace Wordle2;
 

@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.CompilerServices;
-
-namespace Wordle2
+﻿namespace Wordle2
 {
     // work on search of tree
     internal class Tree
@@ -19,20 +11,20 @@ namespace Wordle2
             }
 
             // THREAD - must be done on single thread or dealt with differently
-            public static int nodeCount = 0;
+            public static int NodeCount;
 
             public Node()
             {
-                nodeCount++;
-                if ((nodeCount % 100000) == 0)
-                    Console.WriteLine($"Node count {nodeCount}");
+                NodeCount++;
+                if ((NodeCount % 100000) == 0)
+                    Console.WriteLine($"Node count {NodeCount}");
             }
 
-            public int depth; // root is 0
-            public Knowledge? k;
+            public int Depth; // root is 0
+            public Knowledge? Knowledge;
             public List<Word>? possibleHiddenWords;
             public List<Node> children = new();
-            public Node? parent = null;
+            public Node? parent;
         }
 
         public Node root;
@@ -41,7 +33,7 @@ namespace Wordle2
 
         public void Build(IEnumerable<Word> possibleHiddenWords, params Word[] guessedOrder)
         {
-            root = new Node { k = new(), possibleHiddenWords = new() };
+            root = new Node { Knowledge = new(), possibleHiddenWords = new() };
             root.possibleHiddenWords.AddRange(possibleHiddenWords);
             var unprocessed = new Queue<Node>();
             unprocessed.Enqueue(root);
@@ -52,23 +44,23 @@ namespace Wordle2
             {
                 var node = unprocessed.Dequeue();
                 ++nodesProcessed;
-                if (node.depth > curDepth)
+                if (node.Depth > curDepth)
                 {
-                    curDepth = node.depth;
+                    curDepth = node.Depth;
                     Console.WriteLine($"Node depth to {curDepth} at {nodesProcessed}");
                 }
 
                 if (node.possibleHiddenWords.Count < 2)
                     continue; // done
                 var guesses = Words.AllWords;
-                if (node.depth < guessedOrder.Length)
-                    guesses = new() { guessedOrder[node.depth] };
+                if (node.Depth < guessedOrder.Length)
+                    guesses = new() { guessedOrder[node.Depth] };
 
                 foreach (var hiddenWord in node.possibleHiddenWords)
                     foreach (var guess in guesses)
                     {
                         var k = new Knowledge();
-                        k.Copy(node.k);
+                        k.Copy(node.Knowledge);
                         k.Add(guess.Text, Util.Score(hiddenWord, guess));
                         var newPossible = k.Filter(node.possibleHiddenWords);
                         if (newPossible.Count < node.possibleHiddenWords.Count)
@@ -76,7 +68,7 @@ namespace Wordle2
                             // see if any other kids have same knowledge, if so, this word points there too?
                             var same = false;
                             foreach (var c in node.children)
-                                if (c.k.Same(k))
+                                if (c.Knowledge.Same(k))
                                 {
                                     same = true;
                                     ++sameKnowledge;
@@ -91,9 +83,9 @@ namespace Wordle2
 
                                 var child = new Node
                                 {
-                                    k = k,
+                                    Knowledge = k,
                                     possibleHiddenWords = newPossible,
-                                    depth = node.depth + 1,
+                                    Depth = node.Depth + 1,
                                     parent = node
                                 };
 

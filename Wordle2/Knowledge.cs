@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Security.Cryptography;
 
 namespace Wordle2;
 
@@ -26,14 +25,14 @@ public class Knowledge
     #region Hash count
 
     //THREAD - safe
-    static readonly ConcurrentDictionary<ulong, byte> seenHash = new();
+    static readonly ConcurrentDictionary<ulong, byte> SeenHash = new();
 
-    static long trackedCount = 0;
+    static long trackedCount;
 
     public static void DumpHashInfo()
     {
-        var collisionCount = trackedCount - seenHash.Count;
-        Console.WriteLine($"Unique hashes {seenHash.Count}, collisions {collisionCount}");
+        var collisionCount = trackedCount - SeenHash.Count;
+        Console.WriteLine($"Unique hashes {SeenHash.Count}, collisions {collisionCount}");
     }
 
     // see how many unique knowledge items form
@@ -42,14 +41,13 @@ public class Knowledge
         return; // disable for speed
         Interlocked.Increment(ref trackedCount);
         var hash = k.GenHash();
-        seenHash.AddOrUpdate(hash, 0, (_, _) => 0);
+        SeenHash.AddOrUpdate(hash, 0, (_, _) => 0);
     }
     #endregion
 
     ulong GenHash()
     {
-        ulong hash = 0;
-        hash = correctIndices.GenHash();
+        var hash = correctIndices.GenHash();
         Rotate(ref hash, 41, 0x18974567);
         hash ^= misplacedIndices.GenHash();
         Rotate(ref hash, 21, 238764239234071);
@@ -58,9 +56,9 @@ public class Knowledge
         hash ^= this.unusedBitFlags;
         return hash;
 
-        void Rotate(ref ulong v, int rotate, ulong mult)
+        void Rotate(ref ulong v, int rotate, ulong multiplier)
         {
-            v = v * mult;
+            v = v * multiplier;
             v = (v << rotate) ^ (v >> (64 - rotate));
         }
     }

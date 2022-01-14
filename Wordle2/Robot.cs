@@ -9,17 +9,17 @@ class Robot : IPlayer
 
     int hiddenIndex;
 
-    string [] startWords = null;
-    readonly bool quiet = false;
-    readonly bool multithreaded = false;
+    readonly string [] startWords;
+    readonly bool quiet;
+    readonly bool multiThreaded;
     
-    public Robot(bool verbose, bool quiet = false, bool multithreaded = false, params string [] startWords)
+    public Robot(bool verbose, bool quiet = false, bool multiThreaded = false, params string [] startWords)
     {
         this.verbose = verbose;
         this.startWords = startWords;
         guess = String.Empty;
         this.quiet = quiet;
-        this.multithreaded = multithreaded;
+        this.multiThreaded = multiThreaded;
 
     }
 
@@ -78,7 +78,7 @@ class Robot : IPlayer
                 var left = Util.ScoreAll(
                     knowledge:k, 
                     guessWordStyle:2,
-                    multiThreaded:multithreaded,
+                    multiThreaded:multiThreaded,
                     verbose:false,
                     sortOnWorst:false
                     );

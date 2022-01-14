@@ -1,8 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Collections.Concurrent;
-using System.Diagnostics.Metrics;
-using System.Runtime.Serialization;
 using System.Text;
 using Wordle2;
 using static Wordle2.Util;
@@ -125,16 +123,16 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
         ++pass;
         var startTime = Environment.TickCount;
         Console.Write($"({pass + startCutoff}/{startCutoff + bestGuess.Count}): {start.Word.Text} ({start.Avg:F3}) ({start.Worst}) => ");
-        var (hist, maxword) = Play(
+        var (hist, maxWord) = Play(
             new Robot(false, 
                 quiet: true, 
-                multithreaded:true,
+                multiThreaded:true,
                 startWords: start.Word.Text
                 ), quiet: true); // run robot against PC
         var endTime = Environment.TickCount;
         var elapsed = TimeSpan.FromMilliseconds(endTime - startTime);
         Console.Write($"{elapsed} ");
-        DumpResult(hist, maxword);
+        DumpResult(hist, maxWord);
         results.AddOrUpdate(start.Word.Text, hist, (_, _) => throw new Exception($"Already added {start.Word.Text}"));
     }
 #endif
@@ -157,7 +155,7 @@ var task = words[0];
 switch (task)
 {
     case "0":
-        Play(new Robot(true, multithreaded:true, startWords:words.Skip(1).ToArray())); // run robot against PC
+        Play(new Robot(true, multiThreaded:true, startWords:words.Skip(1).ToArray())); // run robot against PC
         break;
     case "1":
         Play(); // play against PC
@@ -200,38 +198,38 @@ void Analyze()
          {
             //for (var i = 0; i < allLen; ++i)
             for (var j = i + 1; j < allLen; ++j)
-             {
-                 var w1 = hiddenWords[i];
-                 var w2 = hiddenWords[j];
-                 var (best, avg, worst) = Stats(w1, w2);
-                 lock (locker)
-                 {
-                     if (best < bestBest)
-                     {
-                         bestBest = best;
-                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                     }
+            {
+                var w1 = hiddenWords[i];
+                var w2 = hiddenWords[j];
+                var (best, avg, worst) = Stats(w1, w2);
+                lock (locker)
+                {
+                    if (best < bestBest)
+                    {
+                        bestBest = best;
+                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                    }
 
-                     if (avg < bestAvg)
-                     {
-                         bestAvg = avg;
-                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                     }
+                    if (avg < bestAvg)
+                    {
+                        bestAvg = avg;
+                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                    }
 
-                     if (worst < bestWorst)
-                     {
-                         bestWorst = worst;
-                         Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
-                     }
+                    if (worst < bestWorst)
+                    {
+                        bestWorst = worst;
+                        Console.WriteLine($"\n{w1},{w2} -> {best},{avg},{worst}");
+                    }
 
-                     ++finished;
-                     if ((finished % 500) == 0)
-                     {
-                         var pct = finished * 100.0 / total;
-                         Console.Write($"{pct:F2}% ");
-                     }
-                 }
-             }
+                    ++finished;
+                    if ((finished % 500) == 0)
+                    {
+                        var pct = finished * 100.0 / total;
+                        Console.Write($"{pct:F2}% ");
+                    }
+                }
+            }
          }
     );
 
@@ -262,17 +260,17 @@ void GameHelper()
     while (true)
     {
         Console.WriteLine("Enter word then space then 5 letter result sequence using 'G' - green correct, 'Y' yellow misplaced, '.' gray unused, blank to start over");
-        var line = Console.ReadLine();
-        if (string.IsNullOrEmpty(line))
+        var lineRead = Console.ReadLine();
+        if (string.IsNullOrEmpty(lineRead))
         {
             k = new Knowledge();
             continue;
         }
-        if (line.Length != 11)
+        if (lineRead.Length != 11)
             continue;
         uint score = 0;
-        var text = line.Substring(0, 5).ToLower();
-        var resultTxt = line.Substring(6, 5).ToUpper();
+        var text = lineRead.Substring(0, 5).ToLower();
+        var resultTxt = lineRead.Substring(6, 5).ToUpper();
         for (var i = 0; i < resultTxt.Length; ++i)
         {
             var t = resultTxt[i] switch
