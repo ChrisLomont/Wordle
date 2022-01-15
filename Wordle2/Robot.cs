@@ -83,6 +83,10 @@ class Robot : IPlayer
                     sortOnWorst:false
                     );
                 guess = left[0].Word.Text;
+
+                //foreach (var g in left.Take(8))
+                //    Console.Write($"({g.Word},{g.Avg:3},{g.Worst}) ");
+
                 if (hashRound)
                     cacheTwo.Add(result, guess);
             }

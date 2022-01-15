@@ -163,8 +163,41 @@ static class Util
         }
 
         items = SortAns(items, left, sortOnWorst);
+
+        //if (items[0].Worst != 1)
+        //{
+        //    todo TwoStep
+        //}
+
         return items;
     }
+
+    // solve two steps deep, optimize
+    //static List<Ans> TwoStep(List<Ans> items, Knowledge knowledge, List<Word> hiddenList)
+    //{
+    //    Knowledge k1 = new(), k2 = new();
+    //    var left1 = hiddenList;
+    //    foreach (var guess1 in items)
+    //    {
+    //        foreach (var hidden1 in left1)
+    //        {
+    //            k1.Copy(knowledge);
+    //            k1.Add(guess1.Word.Text,Score(hidden1,guess1.Word));
+    //            var left2 = k1.Filter(hiddenList);
+    //            foreach (var guess2 in items)
+    //            {
+    //                foreach (var hidden2 in left2)
+    //                {
+    //                    k2.Copy(k1);
+    //                    k2.Add(guess2.Word.Text, Score(hidden2, guess2.Word));
+    //                    var left
+    //                }
+    //            }
+    //        }
+    //    }
+    //
+    //}
+
 
     static List<Ans> SortAns(List<Ans> ans, List<Word> hiddenWordsLeft, bool sortOnWorst)
     {
