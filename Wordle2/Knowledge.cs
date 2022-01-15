@@ -156,11 +156,15 @@ public class Knowledge
     /// <returns></returns>
     public bool WordPossible(Word word)
     {
-        var b1 = correctIndices.TestAnd(word.CorrectIndices); // has correct ones in place
-        var b2 = (word.UsedBitFlags & unusedBitFlags) == 0; // no unused ones in play
-        var b3 = (word.UsedBitFlags & misplacedUsedBitFlags) == misplacedUsedBitFlags; // all misplaced ones occur
-        var b4 = b1 & b2 & b3;// passed so far
-        if (!b4) return false; // early cutoff
+        // no unused ones in play
+        if ((word.UsedBitFlags & unusedBitFlags) != 0)
+            return false;
+        // all misplaced ones occur
+        if ((word.UsedBitFlags & misplacedUsedBitFlags) != misplacedUsedBitFlags)
+            return false;
+        // has correct ones in place
+        if (!correctIndices.TestAnd(word.CorrectIndices)) 
+            return false;
 
         // letter j cannot be at position i - bitmask
         return misplacedIndices.TestAndZero(word.CorrectIndices);

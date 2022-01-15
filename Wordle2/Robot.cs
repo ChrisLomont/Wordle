@@ -1,4 +1,6 @@
-﻿namespace Wordle2;
+﻿using Microsoft.VisualBasic.CompilerServices;
+
+namespace Wordle2;
 
 // Robot must play on a single thread
 class Robot : IPlayer
@@ -9,7 +11,7 @@ class Robot : IPlayer
 
     int hiddenIndex;
 
-    readonly string [] startWords;
+    string [] startWords;
     readonly bool quiet;
     readonly bool multiThreaded;
     
@@ -23,10 +25,29 @@ class Robot : IPlayer
 
     }
 
+    public List<Word> wordsTaking5Guesses = new();
+
     public string Start()
     {
+        // this word took 5 guesses
+        if (pass == 5)
+            wordsTaking5Guesses.Add(Words.Lookup(guess));
+
         if (hiddenIndex >= Words.HiddenWords.Count)
         {
+            if (!quiet)
+            { // stats
+                // Console.Write("Words taking 5 guesses: ");
+                // foreach (var w in wordsTaking5Guesses.OrderBy(w => w.Text))
+                // {
+                //     var score = Util.Score(w, Words.Lookup(startWords[0]));
+                //     Util.Write(w.Text,score);
+                //     Console.Write(", ");
+                // }
+                // 
+                // Console.WriteLine();
+            }
+
             return "quit";
         }
         if (!quiet)
@@ -60,6 +81,8 @@ class Robot : IPlayer
 
         if (startWords.Length > 0)
             starts = startWords;
+        else 
+            startWords = starts; // for final analysis
 
         if (pass < starts.Length) guess = starts[pass]; // todo - find best?
         else
@@ -84,8 +107,9 @@ class Robot : IPlayer
                     );
                 guess = left[0].Word.Text;
 
-                //foreach (var g in left.Take(8))
-                //    Console.Write($"({g.Word},{g.Avg:3},{g.Worst}) ");
+                // foreach (var g in left.Take(8))
+                //     Console.Write($"({g.Word},{g.Avg:F9},{g.Worst}) ");
+                // Console.WriteLine();
 
                 if (hashRound)
                     cacheTwo.Add(result, guess);

@@ -4,7 +4,7 @@ class Player : IPlayer
 {
     public string Start()
     {
-        Console.WriteLine("Enter word, or blank for random");
+        Console.WriteLine("Choose the hidden word, or blank for random");
         var ans = Console.ReadLine();
 
         return ans ?? String.Empty;
@@ -20,11 +20,11 @@ class Player : IPlayer
 
     public string Get()
     {
-
+        Console.WriteLine("Enter a guess:");
         while (true)
         {
             guess = Console.ReadLine() ?? String.Empty;
-            if (Words.HiddenWords.FirstOrDefault(w => w.Text == guess) != null)
+            if (Words.AllWords.FirstOrDefault(w => w.Text == guess) != null)
                 return guess;
             Console.Write(new string('\b', 5));
         }

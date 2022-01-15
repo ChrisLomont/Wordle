@@ -148,7 +148,15 @@ void ComputeStartingWords(int startCutoff = 0, int endCutoff = 200)
 //return;
 
 // thing to do
-Console.WriteLine("0: run robot (optional words on command line to start play), 1:Play, 2:Helper, 4: best first word, 6: search start words, see code for more");
+Console.WriteLine("Enter command:");
+Console.WriteLine("0: run robot (optional words on command line to start play)");
+Console.WriteLine("1: play against the computer");
+Console.WriteLine("2: Helper to assist playing online");
+Console.WriteLine("3: Analyze two word combos");
+Console.WriteLine("4: best first word");
+Console.WriteLine("5: Some per letter stats");
+Console.WriteLine("6: search start words");
+Console.WriteLine("See code for more");
 var line = Console.ReadLine() ?? "";
 var words = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 var task = words[0];
