@@ -18,7 +18,9 @@ Command line, options roughly explained. Read the code to see more.
 
 Here's a screenshot of the bot finishing testing against all possible hidden words, using the starting word **TRACE** for each game. It averaged 3.4531 moves, solved all under 6 moves, and only 60 (2.59%) used 5 moves. You can start the both with any sequence of start words you want to test.
 
-![]()
+![Wordle bot image](WordleBot.png)
+
+
 
 ## How it works
 
