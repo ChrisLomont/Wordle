@@ -4,6 +4,39 @@ namespace Wordle2;
 
 static class Util
 {
+    public static uint TextToScore(string resultTxt)
+    {
+        uint score = 0;
+        for (var i = 0; i < 5; ++i)
+        {
+            var t = resultTxt[i] switch
+            {
+                '.' => Info.Unused,
+                'Y' => Info.Misplaced,
+                'G' => Info.Perfect,
+                _ => throw new NotImplementedException()
+            };
+            score += ((uint)(t) << (2 * i));
+        }
+        return score;
+    }
+
+    public static string ScoreToText(uint score)
+    {
+
+        string t = "";
+        for (var i = 0; i < 5; ++i)
+        {
+            t += Get(score, i) switch
+            {
+                Info.Unused => '.',
+                Info.Misplaced => 'Y',
+                Info.Perfect => 'G',
+                _ => throw new NotImplementedException()
+            };
+        }
+        return t;
+    }
     public static void TallyLetters()
     {
         // tally letters, output with counts

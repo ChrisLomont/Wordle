@@ -12,6 +12,53 @@ Testing.Test();
 Testing.TestScore();
 
 #if false
+// experiment: trace .YY.Y picks palms next, has some length 5 solutions.
+// try all possible 2 words after the trace part, see if any pairs always reduce to 1 left?
+// for example, these in current tree
+// trace.YY.Y palms .G...gawky.GY..wafer GG.GG waver GGGGG  => waver 5
+// trace.YY.Y palms .G...gawky.G.Y.baker GGGGG  => baker 4
+// trace.YY.Y palms .G...gawky.G...raven GGGGG  => raven 4
+// trace.YY.Y palms .G...gawky.G...raven GG.G.rarer GGGGG  => rarer 5
+//
+// got pass 651/12972 reply,gambs-> 2 (not necessarly best, but good? same as palms scores...?)
+
+
+var k = new Knowledge();
+k.Add("trace",TextToScore(".YY.Y"));
+var k2 = new Knowledge();
+var possibleHidden = k.Filter(Words.HiddenWords);
+var best = Int32.MaxValue;
+for (var i = 0; i < Words.AllWords.Count; ++i)
+{
+    if ((i%10) == 0)
+        Console.WriteLine($"pass {i+1}/{Words.AllWords.Count}");
+    for (var j = i + 1; j < Words.AllWords.Count; ++j)
+    {
+        var w1 = Words.AllWords[i];
+        var w2 = Words.AllWords[j];
+        var worst = 0;
+        foreach (var h in possibleHidden)
+        {
+            k2.Copy(k);
+            k2.Add(w1.Text, Score(h, w1));
+            k2.Add(w2.Text, Score(h, w2));
+            var c = k2.Filter(possibleHidden).Count;
+            worst = Math.Max(c, worst);
+        }
+
+        if (worst < best)
+        {
+            best = worst;
+            Console.WriteLine($"{w1.Text},{w2.Text} -> {best}");
+            Console.WriteLine($"pass {i + 1}/{Words.AllWords.Count}");
+        }
+    }
+}
+
+return;
+#endif
+
+#if false
 // for each start word, see what scores it gives against
 Dictionary<uint, List<(Word answer, Word guess)>> scoreStarts = new();
 foreach (var start in Words.AllWords)
@@ -276,20 +323,11 @@ void GameHelper()
         }
         if (lineRead.Length != 11)
             continue;
-        uint score = 0;
         var text = lineRead.Substring(0, 5).ToLower();
         var resultTxt = lineRead.Substring(6, 5).ToUpper();
-        for (var i = 0; i < resultTxt.Length; ++i)
-        {
-            var t = resultTxt[i] switch
-            {
-                '.' => Info.Unused,
-                'Y' => Info.Misplaced,
-                'G' => Info.Perfect,
-                _ => throw new NotImplementedException()
-            };
-            score += ((uint)(t) << (2 * i));
-        }
+
+        uint score = Util.TextToScore(resultTxt);
+
         k.Add(text, score);
         var left = k.Filter(Words.HiddenWords);
         var ans = ScoreAll(k, verbose: false, guessWordStyle: 2);

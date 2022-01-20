@@ -14,6 +14,8 @@ class Robot : IPlayer
     string [] startWords;
     readonly bool quiet;
     readonly bool multiThreaded;
+
+    private string saveFilename = "";//"tree.txt"; // blank, nothing saved, else robot save the moves
     
     public Robot(bool verbose, bool quiet = false, bool multiThreaded = false, params string [] startWords)
     {
@@ -29,6 +31,12 @@ class Robot : IPlayer
 
     public string Start()
     {
+        if (!string.IsNullOrEmpty(saveFilename))
+        {
+            if (!String.IsNullOrEmpty(guess))
+                File.AppendAllText(saveFilename, $" => {guess} {pass}" + Environment.NewLine); // end of set of guesses
+        }
+
         // this word took 5 guesses
         if (pass == 5)
             wordsTaking5Guesses.Add(Words.Lookup(guess));
@@ -56,7 +64,8 @@ class Robot : IPlayer
         pass = 0;
         if (verbose)
             Console.WriteLine("Robot start");
-        return Words.HiddenWords[hiddenIndex++].Text;// do them all till crash
+        var nextGuess = Words.HiddenWords[hiddenIndex++].Text;
+        return nextGuess;
     }
 
     // cache second word based on response to first, speeds up
@@ -143,5 +152,8 @@ class Robot : IPlayer
             Console.Write($", {left} left, ");
             Knowledge.DumpHashInfo();
         }
+
+        if (!string.IsNullOrEmpty(saveFilename))
+            File.AppendAllText(saveFilename, guess + " " + Util.ScoreToText(result1) + " ");
     }
 }
