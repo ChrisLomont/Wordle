@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using Wordle2;
 using static Wordle2.Util;
@@ -10,6 +11,72 @@ Console.WriteLine("Wordle stuff");
 CheckLetterAssumptions();
 Testing.Test();
 Testing.TestScore();
+
+#if true
+// experiment: trace .YY.Y picks palms next, has some length 5 solutions.
+// try all possible 2 words after the trace part, see if any pairs always reduce to 1 left?
+// for example, these in current tree
+
+var k = new Knowledge();
+k.Add("trace", TextToScore(".YY.Y"));
+var possibleHidden = k.Filter(Words.HiddenWords);
+var (depth, word) = Recurse(k,0,2,3,possibleHidden);
+Console.WriteLine($"{depth} via {word.Text}");
+
+// experiment - recursive searcher
+(int depthNeeded, Word? bestGuess) Recurse(Knowledge k0, int startIndexI0, int depth, int maxDepth,
+    List<Word> possibleHidden)
+{
+    Trace.Assert(possibleHidden.Count>1); // should not be called with this
+    if (depth >= maxDepth) return (Int32.MaxValue, null);
+    int bestScore = Int32.MaxValue;
+    Word? bestWord = null;
+
+    for (var i1 = startIndexI0; i1 < Words.AllWords.Count; ++i1)
+    {
+        var g0 = Words.AllWords[i1]; // guess
+        // compute set of possible scores, associated knowledge, associated left lists
+        Dictionary<uint, (Knowledge,List<Word>)> scores = new();
+        foreach (var h in possibleHidden)
+        {
+            var sc = Score(h,g0);
+            if (!scores.ContainsKey(sc))
+            {
+                var k1 = new Knowledge();
+                k1.Copy(k0);
+                k1.Add(g0.Text, sc);
+                var h1 = k1.Filter(possibleHidden);
+                scores.Add(sc,(k1,h1));
+            }
+        }
+
+        int worst = 0;
+        foreach (var p in scores)
+        {
+            var (s, k1, h1) = (p.Key, p.Value.Item1, p.Value.Item2);
+            if (h1.Count == possibleHidden.Count)
+                continue; // nothing gained this path
+            int depthNeeded;
+            if (h1.Count == 1)
+                depthNeeded = 1;
+            else
+                (depthNeeded, _) = Recurse(k1,i1+1,depth+1,maxDepth,h1);
+            worst = Math.Max(worst,depthNeeded);
+        }
+
+        if (worst < bestScore)
+        {
+            bestScore = worst;
+            bestWord = g0;
+        }
+    }
+
+    return (bestScore, bestWord);
+}
+
+return;
+
+#endif
 
 #if false
 // experiment: trace .YY.Y picks palms next, has some length 5 solutions.
